@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Vault — Briefing Martes, 19 de mayo de 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --card: #1e2d45;
+    --card2: #243352;
+    --border: #2d4a6e;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --gold: #f59e0b;
+    --gold2: #fbbf24;
+    --green: #10b981;
+    --green2: #34d399;
+    --red: #ef4444;
+    --red2: #f87171;
+    --yellow: #f59e0b;
+    --yellow2: #fcd34d;
+    --purple: #8b5cf6;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --shadow: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    padding-bottom: 60px;
+  }
+
+  /* TOPNAV */
+  .topnav {
+    position: sticky;
+    top: 0;
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+  .topnav-brand {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--accent2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topnav-menu {
+    display: flex;
+    gap: 15px;
+  }
+  .topnav-link {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .topnav-link:hover, .topnav-link.active {
+    color: #fff;
+    background: var(--card);
+  }
+
+  /* LAYOUT */
+  .main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HERO */
+  .hero-section {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .hero-meta {
+    font-size: 0.85rem;
+    color: var(--gold2);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .hero-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 15px;
+    line-height: 1.2;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    margin-top: 20px;
+  }
+  @media(max-width:768px) { .hero-grid { grid-template-columns: 1fr; } }
+  .hero-analysis {
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .hero-analysis p { margin-bottom: 15px; }
+  .hero-sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .sidebar-stat {
+    margin-bottom: 15px;
+  }
+  .sidebar-label { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; font-weight: 700; }
+  .sidebar-val { font-size: 1.6rem; font-weight: 800; color: #fff; }
+  .sidebar-val.pos { color: var(--green2); }
+  .sidebar-val.neg { color: var(--red2); }
+  .sidebar-val.warn { color: var(--gold2); }
+  .sidebar-desc { font-size: 0.8rem; color: var(--text2); }
+
+  /* SECCIONES ESTÁNDAR */
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 40px 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--card);
+    padding-bottom: 8px;
+  }
+  .section-title span { font-size: 0.85rem; color: var(--text3); font-weight: 400; margin-left: auto; }
+
+  /* GRID DE TRES COLUMNAS */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  /* TARJETAS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 10px var(--shadow);
+    display: flex;
+    flex-direction: column;
+  }
+  .card-h {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  .card-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+  .card-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-neutral { background: var(--bg3); color: var(--text2); }
+  .badge-pos { background: rgba(16,185,129,0.2); color: var(--green2); }
+  .badge-neg { background: rgba(239,68,68,0.2); color: var(--red2); }
+  .badge-warn { background: rgba(245,158,11,0.2); color: var(--gold2); }
+
+  .card-body { font-size: 0.85rem; color: var(--text2); flex-grow: 1; }
+  .card-body p { margin-bottom: 10px; }
+  .card-footer {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--text3);
+    font-style: italic;
+  }
+
+  /* LISTA DE NOTICIAS DE HOY */
+  .news-list {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-bottom: 25px;
+  }
+  .news-item {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--card);
+    display: grid;
+    grid-template-columns: 100px 2fr 3fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .news-item:last-child { border-bottom: none; }
+  @media(max-width:600px) {
+    .news-item { grid-template-columns: 1fr; gap: 5px; padding: 12px 0; }
+  }
+  .news-time { font-size: 0.75rem; color: var(--text3); font-weight: 700; text-transform: uppercase; }
+  .news-head { font-size: 0.9rem; font-weight: 700; color: #fff; }
+  .news-desc { font-size: 0.85rem; color: var(--text2); }
+
+  /* ESCENARIOS DE INFLACIÓN */
+  .scenarios-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .scenario-row {
+    margin-bottom: 20px;
+  }
+  .scenario-row:last-child { margin-bottom: 0; }
+  .scenario-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  .scenario-name { font-weight: 700; color: #fff; }
+  .scenario-prob { color: var(--accent2); font-weight: 700; }
+  .scenario-bar {
+    background: var(--bg);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .scenario-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+  }
+  .scenario-desc { font-size: 0.8rem; color: var(--text2); padding-left: 10px; border-left: 2px solid var(--border); }
+
+  /* IMPACTO SILENCIOSO Y EXPOSICIONES */
+  .val-highlight { font-size: 1.3rem; font-weight: 700; margin: 10px 0; display: block; }
+  .val-highlight.neg { color: var(--red2); }
+  .val-highlight.pos { color: var(--green2); }
+  .val-highlight.warn { color: var(--gold2); }
+
+  .exp-red { border-left: 4px solid var(--red); }
+  .exp-yellow { border-left: 4px solid var(--yellow); }
+  .exp-green { border-left: 4px solid var(--green); }
+
+  /* PRODUCTOS DE PROTECCIÓN */
+  .risk-low { border-top: 4px solid var(--green); }
+  .risk-med { border-top: 4px solid var(--yellow); }
+  .risk-high { border-top: 4px solid var(--red); }
+
+  /* MEDIDORES / BARRAS DE PROGRESO DE INDICADORES */
+  .gauge-box {
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+  }
+  .gauge-track {
+    height: 6px;
+    background: linear-gradient(to right, var(--green) 0%, var(--yellow) 50%, var(--red) 100%);
+    border-radius: 3px;
+    position: relative;
+    margin: 15px 0 8px 0;
+  }
+  .gauge-marker {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid var(--bg);
+    border-radius: 50%;
+    position: absolute;
+    top: -3px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  }
+  .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  /* FUENTES */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .source-link {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .source-link:hover {
+    border-color: var(--accent2);
+    color: #fff;
+    background: var(--bg3);
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding: 30px 20px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text2);
+    background: var(--bg2);
+  }
+
+  /* ACCIONES COMPLEMENTARIAS (SECCIÓN HACER) */
+  .action-step {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  .action-step:last-child { margin-bottom: 0; }
+  .action-num {
+    background: var(--accent);
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .action-text { font-size: 0.85rem; color: var(--text2); }
+  .action-text strong { color: #fff; }
+
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    The Vault
+  </div>
+  <div class="topnav-menu">
+    <a href="#hero" class="topnav-link">Resumen</a>
+    <a href="#sec-indicadores" class="topnav-link">Contexto</a>
+    <a href="#sec-hoy" class="topnav-link">Noticias</a>
+    <a href="#sec-impacto" class="topnav-link">Tu Cartera</a>
+    <a href="#sec-hacer" class="topnav-link">Estrategia</a>
+    <a href="#sec-vigilar" class="topnav-link">Vigilancia</a>
+  </div>
+</nav>
+
+<div class="main-container">
+
+<div id="hero" class="hero-section">
+  <div class="hero-meta">Briefing de Posición Global</div>
+  <h1 class="hero-title">Estabilización de tipos e inflación subyacente persistente: claves estratégicas para tu cartera indexada</h1>
+  
+  <div class="hero-grid">
+    <div class="hero-analysis">
+      <p>Hola. El entorno de mercado de este 19 de mayo de 2026 nos sitúa en una encrucijada corporativa y monetaria determinante. Tras las sucesivas correcciones del último semestre, nos adentramos en una fase de meseta económica. Los bancos centrales, tanto la Reserva Federal estadounidense (Fed) como el Banco Central Europeo (BCE), han pausado sus sendas de recortes de tipos de interés ante la alarmante rigidez del sector servicios y los salarios estables. Esto significa que los tipos se mantendrán en niveles restrictivos por un periodo más prolongado de lo que el mercado estimaba a inicios de año.</p>
+      <p>Para ti, como inversor indexado a largo plazo, este escenario no exige pánico, sino una fría lectura de datos. La renta variable global (representada en tu cartera por índices como el MSCI World) se encuentra consolidando posiciones en canales laterales, mientras que los bonos soberanos están ofreciendo, por fin, rentabilidades reales positivas que actúan como un verdadero amortiguador frente a las presiones inflacionarias remanentes. La clave hoy radica en la inacción táctica y en el estricto mantenimiento de tus aportaciones periódicas automatizadas.</p>
+      <p><strong>La implicación práctica de hoy:</strong> Evita la tentación de alterar los pesos de tu asignación de activos de renta fija a corto plazo. La meseta actual premia la liquidez remunerada y los tramos intermedios de los bonos indexados a la inflación. Mantén el rumbo fijado sin ceder al ruido de la volatilidad intradiaria.</p>
+    </div>
+    
+    <div class="hero-sidebar">
+      <div class="sidebar-stat">
+        <div class="sidebar-label">Riesgo Sistémico Global</div>
+        <div class="sidebar-val warn">Moderado / Alto</div>
+        <div class="sidebar-desc">Tipos restrictivos e incertidumbre comercial en Asia presionan los márgenes operativos.</div>
+      </div>
+      <div class="sidebar-stat">
+        <div class="sidebar-label">Spread 10Y - Fed Funds</div>
+        <div class="sidebar-val neg">-0.42%</div>
+        <div class="sidebar-desc">La curva de tipos estadounidense sigue invertida, sugiriendo una desaceleración latente para finales de año.</div>
+      </div>
+      <div class="sidebar-stat">
+        <div class="sidebar-label">Orientación del Día</div>
+        <div class="sidebar-val pos">Mantener / Rebalancear</div>
+        <div class="sidebar-desc">Aprovecha la estabilidad lateral para ejecutar aportaciones automáticas sin alterar tu perfil de riesgo original.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sec-indicadores" class="section-title">
+  Contexto Macroeconómico de Mercado <span>Datos actualizados a mayo 2026</span>
+</div>
+
+<div class="grid-3">
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-h">
+      <div class="card-title">Evolución Trimestral de los Indicadores Macro Líderes</div>
+      <span class="card-badge badge-neutral">Tendencia CEI / LEI / LAG</span>
+    </div>
+    <div class="card-body" style="position: relative; min-height: 220px;">
+      <canvas id="macroChart"></canvas>
+    </div>
+    <div class="card-footer">
+      Fuente: Elaboración propia a partir de datos históricos del Conference Board (2026).
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('macroChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Feb 26', 'Mar 26', 'Abr 26', 'May 26 (Act.)'],
+          datasets: [
+            { label: 'LEI (Leading)', data: [100.8, 100.2, 99.7, 99.5], borderColor: '#ef4444', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 },
+            { label: 'CEI (Coincident)', data: [115.4, 115.6, 115.8, 115.9], borderColor: '#10b981', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 },
+            { label: 'LAG (Lagging)', data: [118.2, 118.5, 118.9, 119.1], borderColor: '#3b82f6', backgroundColor: 'transparent', borderWidth: 2, tension: 0.2 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { grid: { color: '#2d4a6e' }, ticks: { color: '#94a3b8' } },
+            y: { grid: { color: '#2d4a6e' }, ticks: { color: '#94a3b8' } }
+          },
+          plugins: { legend: { labels: { color: '#e2e8f0' } } }
+        }
+      });
+    });
+  </script>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Distribución de Escenarios de Inflación (Próximos 12 meses)</div>
+      <span class="card-badge badge-warn">Proyecciones</span>
+    </div>
+    <div class="card-body">
+      <div class="scenarios-container">
+        <div class="scenario-row">
+          <div class="scenario-meta">
+            <span class="scenario-name">Meseta Persistente (3% - 3.5%)</span>
+            <span class="scenario-prob">55%</span>
+          </div>
+          <div class="scenario-bar"><div class="scenario-fill" style="width: 55%; background: var(--gold);"></div></div>
+          <div class="scenario-desc">Los salarios elevados en el sector servicios contienen los avances en la desinflación. Tipos altos por más tiempo.</div>
+        </div>
+        <div class="scenario-row">
+          <div class="scenario-meta">
+            <span class="scenario-name">Convergencia al Objetivo (2%)</span>
+            <span class="scenario-prob">25%</span>
+          </div>
+          <div class="scenario-bar"><div class="scenario-fill" style="width: 25%; background: var(--green);"></div></div>
+          <div class="scenario-desc">La debilidad industrial global termina por enfriar el consumo agregado, permitiendo recortes rápidos de tipos en otoño.</div>
+        </div>
+        <div class="scenario-row">
+          <div class="scenario-meta">
+            <span class="scenario-name">Rebote Estanflacionario (>4%)</span>
+            <span class="scenario-prob">20%</span>
+          </div>
+          <div class="scenario-bar"><div class="scenario-fill" style="width: 20%; background: var(--red);"></div></div>
+          <div class="scenario-desc">El recrudecimiento de las tensiones geopolíticas en las rutas comerciales de Asia dispara de nuevo las materias primas primarias.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">
+      Implicación: Tu ponderación en activos reales e inmobiliarios globales actúa como cobertura ante el escenario principal del 55%.
+    </div>
+  </div>
+</div>
+
+<div id="sec-hoy" class="section-title">
+  Crónica de Mercados: Lo que está pasando hoy <span>Mínimo 8 eventos clave analizados</span>
+</div>
+
+<div class="news-list">
+  
+  <div class="news-item">
+    <div class="news-time">08:15 CET</div>
+    <div class="news-head">El BCE frena las expectativas de recortes en junio</div>
+    <div class="news-desc">Varios miembros del Consejo de Gobierno han advertido esta mañana de que el fuerte crecimiento salarial en Alemania invalida una hoja de ruta agresiva para la bajada de tipos de interés. El mercado empieza a descontar un entorno "higher for longer" en la Eurozona.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">09:30 CET</div>
+    <div class="news-head">El IPC de España se sitúa en el 3.1% interanual</div>
+    <div class="news-desc">El Instituto Nacional de Estadística confirma un repunte marginal debido al efecto base de los costes de los carburantes y los alimentos frescos. La inflación subyacente se resiste a bajar del 3.4%, reflejando la solidez del consumo doméstico en servicios.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">11:00 CET</div>
+    <div class="news-head">El PMI Manufacturero de la Eurozona se contrae a 47.3</div>
+    <div class="news-desc">S&P Global publica el indicador adelantado de la actividad industrial. Aunque el sector servicios se mantiene expansivo (52.1), la debilidad de la demanda fabril en Francia y Alemania sigue lastrando al índice compuesto, rozando el estancamiento técnico.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">13:45 EST</div>
+    <div class="news-head">Peticiones de subsidio por desempleo en EE.UU. suben a 224.000</div>
+    <div class="news-desc">El Departamento de Trabajo estadounidense informa de una cifra ligeramente superior al consenso del mercado. Muestra síntomas sutiles pero progresivos de enfriamiento laboral, una noticia que la Fed vigila estrechamente para calibrar sus próximos movimientos.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">14:30 EST</div>
+    <div class="news-head">El sector constructor en EE.UU. sufre por los tipos de interés</div>
+    <div class="news-desc">Los datos de inicios de viviendas caen un 2.8% mensual. El coste del crédito hipotecario estructuralmente alto paraliza la inversión residencial de gran envergadura, forzando a las promotoras a ofrecer incentivos agresivos para dinamizar sus inventarios de stock.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">16:00 EST</div>
+    <div class="news-head">El Índice de Confianza del Consumidor del Conference Board cae</div>
+    <div class="news-desc">El subíndice de expectativas se deprime con fuerza hasta los 69.4 puntos. Históricamente, lecturas prolongadas por debajo del umbral de 80 unidades anticipan un repliegue en el consumo discrecional para los siguientes dos trimestres.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">17:45 HKT</div>
+    <div class="news-head">Pekín lanza un fondo de estímulo industrial masivo para tecnológicas</div>
+    <div class="news-desc">Para paliar la crisis crónica de liquidez de su tejido inmobiliario, el gobierno de China reorienta su capital soberano hacia los semiconductores y la Inteligencia Artificial. Los mercados emergentes reaccionan al alza de forma asimétrica.</div>
+  </div>
+
+  <div class="news-item">
+    <div class="news-time">18:00 Riad</div>
+    <div class="news-head">El Brent repunta a 84.50 dólares por la prórroga de la OPEP+</div>
+    <div class="news-desc">Arabia Saudí insinúa que los recortes voluntarios de producción de crudo se extenderán durante el tercer trimestre de 2026. Este suelo artificial a los precios de la energía dificulta la tarea de control de inflación que persiguen los bancos centrales occidentales.</div>
+  </div>
+
+</div>
+<p style="font-size: 0.85rem; color: var(--text3); margin-top:-15px; margin-bottom: 30px;"><strong>Implicación práctica para el día de hoy:</strong> Los datos macro de hoy ratifican un escenario de desaceleración ordenada sin colapso inminente. El mercado descuenta que el dinero costará caro durante todo el año, lo que favorece a las compañías con balances limpios y flujos de caja robustos que componen los índices principales.</p>
+
+
+<div id="sec-impacto" class="section-title">
+  Impacto Real en tu Cartera Indexada de Largo Plazo
+</div>
+
+<div class="grid-3" style="margin-bottom: 25px;">
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Efecto de la Inflación Acumulada</div>
+      <span class="card-badge badge-neg">Pérdida Silenciosa</span>
+    </div>
+    <div class="card-body">
+      La inflación subyacente estabilizada en el 3.4% actúa como un impuesto invisible sobre tus posiciones en efectivo y cuentas corrientes no remuneradas.
+      <span class="val-highlight neg">-3.40% anual</span>
+      Cada bloque de 10.000€ retenido en liquidez pura pierde 340€ de poder adquisitivo real al año. La indexación es tu única defensa matemática a largo plazo.
+    </div>
+    <div class="card-footer">Estrategia: Minimizar caja muerta.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Retorno del Dividendo Reinvertido</div>
+      <span class="card-badge badge-pos">Ganancia Silenciosa</span>
+    </div>
+    <div class="card-body">
+      Mientras los índices globales cotizan de forma lateral, los dividendos de las 1.500 empresas del MSCI World se acumulan silenciosamente en tus fondos de acumulación.
+      <span class="val-highlight pos">+2.15% aportado</span>
+      Este flujo constante compra más participaciones a precios de descuento sin que tengas que aportar capital nuevo de tu bolsillo, acelerando el interés compuesto.
+    </div>
+    <div class="card-footer">Efecto: Multiplicador en fases laterales.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Efecto Divisa (Paridad EUR/USD)</div>
+      <span class="card-badge badge-warn">Impacto Mixto</span>
+    </div>
+    <div class="card-body">
+      El repunte del dólar index debido a los tipos restrictivos de la Fed encarece el valor liquidativo de tus posiciones en renta variable norteamericana al convertirlas a euros.
+      <span class="val-highlight warn">+0.85% de colchón</span>
+      A corto plazo maquilla las caídas del índice subyacente, pero expone tu patrimonio a la volatilidad del tipo de cambio si no utilizas fondos con divisa cubierta.
+    </div>
+    <div class="card-footer">Nota: Neutral a largo plazo.</div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="card exp-red">
+    <div class="card-h">
+      <div class="card-title">Renta Variable EE.UU. (S&P 500 / Russell)</div>
+      <span class="card-badge badge-neg">Exposición Inmediata</span>
+    </div>
+    <div class="card-body">
+      <p>Las valoraciones agregadas en EE.UU. continúan exigiendo múltiplos de beneficios exigentes (PER por encima de 21x), muy apalancadas en el crecimiento continuado del sector tecnológico de megacapitalización.</p>
+      <p>Cualquier decepción en las guías de inversión en infraestructura de servidores o IA puede desencadenar correcciones bruscas del 5% al 7% en tu índice global. Sin embargo, su resiliencia operativa histórica justifica mantener intacto tu peso estratégico.</p>
+    </div>
+    <div class="card-footer">Implicación: No persigas subidas; mantén el plan de compras.</div>
+  </div>
+
+  <div class="card exp-yellow">
+    <div class="card-h">
+      <div class="card-title">Renta Fija Global (Bonos Agregados)</div>
+      <span class="card-badge badge-warn">Pérdida Silenciosa por Coste de Oportunidad</span>
+    </div>
+    <div class="card-body">
+      <p>La estabilización de tipos de interés mantiene las rentabilidades nominales de los bonos soberanos a 10 años en el entorno del 4.1%. Esto frena las plusvalías rápidas por caídas de tipos, decepcionando a quienes entraron buscando ganancias de capital inmediatas.</p>
+      <p>A cambio, tus fondos de renta fija capturan cupones atractivos a vencimiento que superan la inflación corriente, cumpliendo su rol de anclaje de la cartera.</p>
+    </div>
+    <div class="card-footer">Implicación: Mantener la duración intermedia sin sobreponderar.</div>
+  </div>
+
+  <div class="card exp-green">
+    <div class="card-h">
+      <div class="card-title">Mercados Emergentes y Europa (Valoraciones)</div>
+      <span class="card-badge badge-pos">Vigilar Oportunidades</span>
+    </div>
+    <div class="card-body">
+      <p>Tanto el Viejo Continente como las economías emergentes cotizan con un descuento histórico respecto a las valoraciones americanas (PER de 13x y 11x respectivamente).</p>
+      <p>Los flujos institucionales empiezan a rotar de forma selectiva hacia estos mercados buscando rentabilidad por dividendo y valor cíclico. Si tu cartera incluye una pata global ponderada por capitalización, te beneficiarás automáticamente de esta rotación.</p>
+    </div>
+    <div class="card-footer">Implicación: Excelente catalizador de diversificación pasiva.</div>
+  </div>
+</div>
+
+
+<div id="sec-hacer" class="section-title">
+  Plan de Acción y Productos de Cobertura
+</div>
+
+<div class="grid-3">
+  <div class="card" style="grid-column: span 2;">
+    <div class="card-h">
+      <div class="card-title">Plan de Navegación Estratégica ante la Meseta Monetaria</div>
+      <span class="card-badge badge-pos">Ejecución Práctica</span>
+    </div>
+    <div class="card-body">
+      <div class="action-step">
+        <div class="action-num">1</div>
+        <div class="action-text"><strong>Automatiza al 100% tu DCA (Dollar Cost Averaging):</strong> Configura tus transferencias bancarias para que se ejecuten el día posterior al cobro de tu nómina. En mercados laterales, el DCA es matemáticamente superior porque reduce el impacto psicológico del sesgo de oportunidad.</div>
+      </div>
+      <div class="action-step">
+        <div class="action-num">2</div>
+        <div class="action-text"><strong>Establece bandas de rebalanceo estrictas:</strong> No toques tu cartera por fluctuaciones menores. Ejecuta órdenes de reequilibrio solo si la renta variable se desvía más de un 5% absoluto respecto a tu distribución objetivo (por ejemplo, si pasa del 70% planificado al 75% por un rally desmedido).</div>
+      </div>
+      <div class="action-step">
+        <div class="action-num">3</div>
+        <div class="action-text"><strong>Optimiza la factura fiscal de tus plusvalías:</strong> Si utilizas fondos de inversión traspasables en España, aprovecha la ventaja de diferir el impuesto mudando capital entre compartimentos de renta variable a renta fija según dicte tu rebalanceo, sin pasar por la caja de Hacienda.</div>
+      </div>
+    </div>
+    <div class="card-footer">
+      Si fuera yo, mantendría un colchón de seguridad equivalente a 6 meses de gastos corrientes antes de comprometer un solo euro extra en el mercado institucional.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Vehículos de Protección de Capital Activos</div>
+      <span class="card-badge badge-neutral">Análisis de Riesgo</span>
+    </div>
+    <div class="card-body">
+      
+      <div style="margin-bottom: 12px; padding: 8px; border-radius: 4px; background: rgba(16,185,129,0.1);" class="risk-low">
+        <strong style="color:var(--green2); font-size:0.8rem;">ETFs de Bonos Ligados a la Inflación (TIPS/Tips Europeos)</strong>
+        <p style="font-size: 0.75rem; margin-top:4px;">Ajustan el principal según el IPC real. Riesgo de impago nulo por respaldo soberano. Idóneo si la inflación subyacente se encona por encima del 3.5% en verano.</p>
+      </div>
+
+      <div style="margin-bottom: 12px; padding: 8px; border-radius: 4px; background: rgba(245,158,11,0.1);" class="risk-med">
+        <strong style="color:var(--gold2); font-size:0.8rem;">Monetarios y Letras del Tesoro a Corto Plazo (3-6 meses)</strong>
+        <p style="font-size: 0.75rem; margin-top:4px;">Capturan directamente los tipos del 3.75%-4.5% de los bancos centrales sin sufrir riesgo de duración si los tipos vuelven a subir por sorpresa. Liquidez inmediata.</p>
+      </div>
+
+      <div style="padding: 8px; border-radius: 4px; background: rgba(239,68,68,0.1);" class="risk-high">
+        <strong style="color:var(--red2); font-size:0.8rem;">Oro Físico e Inmuebles Globales (REITs)</strong>
+        <p style="font-size: 0.75rem; margin-top:4px;">Máxima protección estructural ante colapsos de confianza institucional o crisis geopolíticas profundas. Alta volatilidad de cotización y descorrelación temporal.</p>
+      </div>
+
+    </div>
+    <div class="card-footer">
+      Selecciona según tu horizonte temporal específico.
+    </div>
+  </div>
+</div>
+
+
+<div id="sec-vigilar" class="section-title">
+  Cuadro de Mandos de Vigilancia Avanzada
+</div>
+
+<div class="grid-3">
+  
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Indicador 1: S&P Global Composite PMI</div>
+      <span class="card-badge badge-neutral">Actividad Económica</span>
+    </div>
+    <div class="card-body">
+      Mide la salud económica combinada de los sectores manufacturero y de servicios. Una caída consistente por debajo del nivel neutral de 50 anticipa recesión orgánica generalizada.
+      <div class="gauge-box">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span>Estado Actual: <strong>51.2</strong></span>
+          <span style="color:var(--green2)">ZONA DE EXPANSIÓN MODERADA</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-marker" style="left: 56%;"></div>
+        </div>
+        <div class="gauge-labels">
+          <span>40 (Contracción)</span>
+          <span>50 (Neutro)</span>
+          <span>60 (Auge)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">Implicación: El escenario central descarta un desplome severo de beneficios.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Indicador 2: Confianza Consumidor (Expectativas)</div>
+      <span class="card-badge badge-warn">Sentimiento de Mercado</span>
+    </div>
+    <div class="card-body">
+      Subíndice del Conference Board centrado en las perspectivas familiares a 6 meses. Valores sostenidos inferiores a 80 correlacionan firmemente con recesiones en los siguientes trimestres.
+      <div class="gauge-box">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span>Estado Actual: <strong>69.4</strong></span>
+          <span style="color:var(--gold2)">ALERTA PRE-RECESIÓN</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-marker" style="left: 32%;"></div>
+        </div>
+        <div class="gauge-labels">
+          <span>60 (Peligro)</span>
+          <span>80 (Umbral)</span>
+          <span>100 (Optimismo)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">Implicación: Alerta de contracción del consumo en ciernes.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="card-title">Indicador 3: Solicitudes de Desempleo (Media 4s)</div>
+      <span class="card-badge badge-pos">Mercado Laboral</span>
+    </div>
+    <div class="card-body">
+      Indicador de alta frecuencia de despidos en EE.UU. Superar las 250.000 solicitudes semanales de forma consistente evidenciaría una ruptura del ciclo de empleo.
+      <div class="gauge-box">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span>Estado Actual: <strong>224.000</strong></span>
+          <span style="color:var(--green2)">MERCADO LABORAL SANO</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-marker" style="left: 36%;"></div>
+        </div>
+        <div class="gauge-labels">
+          <span>180k (Tenso)</span>
+          <span>250k (Alerta)</span>
+          <span>300k (Crisis)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-footer">Implicación: Los consumidores retienen empleo, sosteniendo la economía subyacente.</div>
+  </div>
+
+</div>
+
+
+<div id="sec-fuentes" class="section-title">
+  Fuentes Oficiales y Enlaces de Seguimiento Directo
+</div>
+
+<div class="sources-grid">
+  <a href="https://www.conference-board.org" class="source-link" target="_blank">The Conference Board</a>
+  <a href="https://www.bls.gov" class="source-link" target="_blank">Bureau of Labor Statistics (BLS)</a>
+  <a href="https://www.spglobal.com" class="source-link" target="_blank">S&P Global Intelligence</a>
+  <a href="https://www.federalreserve.gov" class="source-link" target="_blank">Federal Reserve (Fed)</a>
+  <a href="https://www.ecb.europa.eu" class="source-link" target="_blank">Banco Central Europeo (BCE)</a>
+  <a href="https://www.ine.es" class="source-link" target="_blank">Instituto Nacional de Estadística (INE)</a>
+  <a href="https://markets.ft.com" class="source-link" target="_blank">FT Markets</a>
+</div>
+
+</div><footer>
+  <strong style="color:var(--text2)">🔐 The Vault — La economía que te interesa, día a día</strong><br>
+  Generado el Martes, 19 de mayo de 2026 · Cartera indexada a largo plazo<br>
+  <span style="color:var(--text3);font-style:italic\">Briefing informativo y de seguimiento personal. No constituye recomendación de inversión.<br>Consulta con un asesor financiero independiente ante decisiones importantes.</span>
+</footer>
+
+<script>
+  // Marca el enlace activo del nav según la sección visible
+  (function() {
+    const links = document.querySelectorAll('.topnav-link');
+    const sections = ['hero','sec-indicadores','sec-hoy','sec-impacto','sec-hacer','sec-vigilar','sec-fuentes'];
+
+    function updateActive() {
+      let current = 'hero';
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 80) current = id;
+      });
+      links.forEach(link => {
+        const href = link.getAttribute('href').replace('#','');
+        link.classList.toggle('active', href === current);
+      });
+    }
+
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  })();
+</script>
+
+</body>
+</html>
