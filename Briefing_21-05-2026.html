@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Vault — Briefing 21 de mayo de 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0f1e; --bg2: #111827; --bg3: #1a2235; --card: #1e2d45; --card2: #243352;
+    --border: #2d4a6e; --accent: #3b82f6; --accent2: #60a5fa; --gold: #f59e0b; --gold2: #fbbf24;
+    --green: #10b981; --green2: #34d399; --red: #ef4444; --red2: #f87171;
+    --yellow: #f59e0b; --yellow2: #fcd34d; --purple: #8b5cf6;
+    --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4); --glow: 0 0 20px rgba(59,130,246,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+  .topnav { position: sticky; top: 0; z-index: 100; background: rgba(10,15,30,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0; padding: 0 24px; height: 46px; overflow-x: auto; scrollbar-width: none; }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav-brand { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--accent2); letter-spacing: -0.01em; white-space: nowrap; padding-right: 20px; border-right: 1px solid var(--border); margin-right: 8px; flex-shrink: 0; text-decoration: none; }
+  .topnav-brand:hover { color: var(--text); }
+  .topnav-brand .vault-icon { font-size: 16px; }
+  .topnav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
+  .topnav-link { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--text3); text-decoration: none; padding: 0 12px; height: 46px; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; letter-spacing: 0.02em; text-transform: uppercase; }
+  .topnav-link:hover { color: var(--text2); border-bottom-color: var(--border); }
+  .topnav-link.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+  .topnav-link .nav-icon { font-size: 13px; }
+  .topnav-date { margin-left: auto; font-size: 11px; color: var(--text3); white-space: nowrap; padding-left: 16px; flex-shrink: 0; border-left: 1px solid var(--border); }
+  .hero { background: linear-gradient(135deg, #0a0f1e 0%, #0f2040 40%, #1a1040 100%); border-bottom: 1px solid var(--border); padding: 28px 32px 20px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%); border-radius: 50%; }
+  .hero::after { content: ''; position: absolute; bottom: -80px; left: 30%; width: 400px; height: 200px; background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%); border-radius: 50%; }
+  .hero-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
+  .hero-badge { display: flex; align-items: center; gap: 10px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); border-radius: 40px; padding: 6px 16px 6px 10px; font-size: 12px; color: var(--accent2); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .hero-badge span { font-size: 16px; }
+  .hero-date { font-size: 12px; color: var(--text3); background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 5px 14px; }
+  .hero-title { font-size: clamp(22px, 4vw, 36px); font-weight: 800; margin-top: 16px; position: relative; z-index: 1; letter-spacing: -0.02em; }
+  .hero-title span { color: var(--accent2); }
+  .hero-subtitle { color: var(--text2); font-size: 14px; margin-top: 6px; position: relative; z-index: 1; }
+  .signal-bar { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 14px 20px; border-radius: 12px; position: relative; z-index: 1; }
+  .signal-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+  .signal-yellow { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+  .signal-red   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); }
+  .signal-icon { font-size: 22px; }
+  .signal-text strong { font-size: 15px; }
+  .signal-green .signal-text strong { color: var(--green2); }
+  .signal-yellow .signal-text strong { color: var(--yellow2); }
+  .signal-red .signal-text strong { color: var(--red2); }
+  .signal-text p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .ticker-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; }
+  .ticker-bar::-webkit-scrollbar { display: none; }
+  .ticker-item { display: flex; flex-direction: column; align-items: center; min-width: fit-content; gap: 2px; }
+  .ticker-name { font-size: 10px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ticker-price { font-size: 14px; font-weight: 700; color: var(--text); }
+  .ticker-change { font-size: 11px; font-weight: 600; }
+  .up { color: var(--green2); } .down { color: var(--red2); } .neutral { color: var(--text2); }
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .hero, .ticker-bar, .main { padding-left: 16px; padding-right: 16px; } }
+  .section { margin-bottom: 36px; }
+  .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); transition: border-color 0.2s; }
+  .card:hover { border-color: var(--accent); }
+  .card-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .indicator-row { padding: 14px 0 16px; border-bottom: 1px solid rgba(45,74,110,0.5); }
+  .indicator-row:last-child { border-bottom: none; padding-bottom: 4px; }
+  .ind-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .ind-name { font-size: 13px; color: var(--text); font-weight: 700; }
+  .ind-value { text-align: right; flex-shrink: 0; margin-left: 12px; }
+  .ind-num { font-size: 16px; font-weight: 800; }
+  .ind-trend { font-size: 11px; color: var(--text2); margin-top: 1px; text-align: right; }
+  .ind-explain { font-size: 11px; color: var(--text3); line-height: 1.5; margin-bottom: 8px; font-style: italic; }
+  .ind-ranges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .range-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .range-green  { background: rgba(16,185,129,0.15); color: var(--green2); border: 1px solid rgba(16,185,129,0.25); }
+  .range-yellow { background: rgba(245,158,11,0.15);  color: var(--gold2);  border: 1px solid rgba(245,158,11,0.25); }
+  .range-red    { background: rgba(239,68,68,0.15);   color: var(--red2);   border: 1px solid rgba(239,68,68,0.25); }
+  .ind-bar-wrap { position: relative; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: visible; margin-top: 4px; }
+  .ind-bar-zone { position: absolute; height: 100%; border-radius: 2px; }
+  .ind-bar-marker { position: absolute; top: -3px; width: 12px; height: 12px; background: #fff; border: 2px solid; border-radius: 50%; transform: translateX(-50%); z-index: 2; }
+  .ind-bar-label { position: absolute; top: 10px; font-size: 9px; color: var(--text3); transform: translateX(-50%); white-space: nowrap; }
+  .ind-detail { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .buffett-gauge { display: flex; gap: 16px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .buffett-levels { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 180px; }
+  .buffett-level { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text2); }
+  .buffett-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .buffett-active { font-weight: 700; color: var(--text); }
+  .buffett-arrow { font-size: 12px; margin-left: 4px; }
+  .cycle-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 4px; }
+  @media (max-width: 900px) { .cycle-container { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .cycle-container { grid-template-columns: 1fr; } }
+  .cycle-phase { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 16px; position: relative; transition: border-color 0.2s; }
+  .cycle-phase.active { border-width: 2px; box-shadow: 0 0 20px rgba(59,130,246,0.12); }
+  .cycle-phase.active.phase-expansion  { border-color: var(--green2); background: rgba(16,185,129,0.05); }
+  .cycle-phase.active.phase-decel      { border-color: var(--gold2);  background: rgba(245,158,11,0.05); }
+  .cycle-phase.active.phase-contraction{ border-color: var(--red2);   background: rgba(239,68,68,0.05); }
+  .cycle-phase.active.phase-recovery   { border-color: var(--accent2);background: rgba(59,130,246,0.05); }
+  .phase-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .phase-icon { font-size: 22px; }
+  .phase-here { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.1); color: var(--text); }
+  .phase-name { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+  .phase-expansion  .phase-name { color: var(--green2); }
+  .phase-decel      .phase-name { color: var(--gold2); }
+  .phase-contraction .phase-name { color: var(--red2); }
+  .phase-recovery   .phase-name { color: var(--accent2); }
+  .phase-desc { font-size: 11px; color: var(--text2); line-height: 1.5; }
+  .phase-signal { font-size: 10px; font-weight: 700; margin-top: 8px; color: var(--text3); }
+  .summary-box { background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.05) 100%); border: 1px solid rgba(59,130,246,0.2); border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; }
+  .summary-box p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+  .summary-box p + p { margin-top: 10px; }
+  .summary-box strong { color: var(--text); }
+  .week-news-item { padding: 14px 0; border-bottom: 1px solid rgba(45,74,110,0.4); display: flex; gap: 14px; align-items: flex-start; }
+  .week-news-item:last-child { border-bottom: none; }
+  .week-num { font-size: 11px; font-weight: 800; color: var(--purple); background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .week-content {}
+  .week-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .week-body { font-size: 13px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
+  .week-source { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .week-thread { background: linear-gradient(135deg, rgba(139,92,246,0.07) 0%, rgba(59,130,246,0.05) 100%); border: 1px solid rgba(139,92,246,0.2); border-radius: 12px; padding: 16px 20px; margin-top: 16px; }
+  .week-thread-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--purple); margin-bottom: 8px; }
+  .week-thread p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .week-thread strong { color: var(--text); }
+  .week-impact { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .week-impact-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .week-impact-val { font-size: 22px; font-weight: 800; }
+  .week-impact-desc { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .week-coming { margin-top: 14px; background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.15); border-radius: 12px; padding: 14px 18px; }
+  .week-coming-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent2); margin-bottom: 8px; }
+  .week-coming-item { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 4px; }
+  .week-coming-item strong { color: var(--text); }
+  .news-item { padding: 18px 0; border-bottom: 1px solid rgba(45,74,110,0.5); display: flex; gap: 16px; align-items: flex-start; }
+  .news-item:last-child { border-bottom: none; }
+  .news-num { font-size: 11px; font-weight: 800; color: var(--accent2); background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .news-content {}
+  .news-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.4; }
+  .news-body  { font-size: 15px; color: var(--text2); margin-top: 6px; line-height: 1.6; }
+  .news-source { font-size: 12px; color: var(--text3); margin-top: 5px; }
+  .news-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tag-geo   { background: rgba(239,68,68,0.15);   color: var(--red2);   border: 1px solid rgba(239,68,68,0.2); }
+  .tag-mon   { background: rgba(59,130,246,0.15);   color: var(--accent2);border: 1px solid rgba(59,130,246,0.2); }
+  .tag-inf   { background: rgba(245,158,11,0.15);   color: var(--gold2);  border: 1px solid rgba(245,158,11,0.2); }
+  .tag-mkt   { background: rgba(16,185,129,0.15);   color: var(--green2); border: 1px solid rgba(16,185,129,0.2); }
+  .tag-trade { background: rgba(139,92,246,0.15);   color: #a78bfa;       border: 1px solid rgba(139,92,246,0.2); }
+  .tag-ener  { background: rgba(251,146,60,0.15);   color: #fb923c;       border: 1px solid rgba(251,146,60,0.2); }
+  .tag-emp   { background: rgba(6,182,212,0.15);    color: #22d3ee;       border: 1px solid rgba(6,182,212,0.2); }
+  .scenario { background: var(--bg3); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .scenario-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .scenario-name { font-size: 13px; font-weight: 700; }
+  .scenario-prob { font-size: 13px; font-weight: 800; }
+  .scenario-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 8px; }
+  .scenario-fill { height: 100%; border-radius: 3px; }
+  .scenario-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .market-block { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .market-block-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .market-block-icon { font-size: 18px; }
+  .market-block-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .market-block p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .risk-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; border-left: 4px solid; margin-bottom: 14px; }
+  .risk-card:last-child { margin-bottom: 0; }
+  .risk-card.high { border-left-color: var(--red); }
+  .risk-card.med  { border-left-color: var(--yellow); }
+  .risk-card.low  { border-left-color: var(--green); }
+  .risk-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .risk-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .risk-prob { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .risk-card.high .risk-prob { background: rgba(239,68,68,0.15); color: var(--red2); }
+  .risk-card.med  .risk-prob { background: rgba(245,158,11,0.15); color: var(--gold2); }
+  .risk-card.low  .risk-prob { background: rgba(16,185,129,0.15); color: var(--green2); }
+  .risk-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 10px; }
+  .risk-impact { font-size: 12px; }
+  .risk-impact span { color: var(--text3); }
+  .product-impact { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; border-left: 4px solid var(--border); }
+  .product-impact.pi-rv    { border-left-color: var(--accent); }
+  .product-impact.pi-gold  { border-left-color: var(--gold); }
+  .product-impact.pi-liq   { border-left-color: var(--green); }
+  .product-impact.pi-rf    { border-left-color: var(--purple); }
+  .pi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .pi-title { font-size: 15px; font-weight: 800; }
+  .product-impact.pi-rv   .pi-title { color: var(--accent2); }
+  .product-impact.pi-gold .pi-title { color: var(--gold2); }
+  .product-impact.pi-liq  .pi-title { color: var(--green2); }
+  .product-impact.pi-rf   .pi-title { color: #a78bfa; }
+  .pi-badge { font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+  .pi-pos  { background: rgba(16,185,129,0.15); color: var(--green2); }
+  .pi-neu  { background: rgba(148,163,184,0.12); color: var(--text2); }
+  .pi-neg  { background: rgba(239,68,68,0.15);   color: var(--red2);  }
+  .pi-mix  { background: rgba(245,158,11,0.15);  color: var(--gold2); }
+  .pi-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+  .pi-scenarios { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  @media (max-width: 700px) { .pi-scenarios { grid-template-columns: 1fr; } }
+  .pi-scenario-box { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.05); }
+  .pi-scenario-name { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+  .pi-scenario-box.sc-soft   .pi-scenario-name { color: var(--green2); }
+  .pi-scenario-box.sc-stagfl .pi-scenario-name { color: var(--gold2); }
+  .pi-scenario-box.sc-rec    .pi-scenario-name { color: var(--red2); }
+  .pi-scenario-val { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .option-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; margin-bottom: 14px; }
+  .option-card:last-child { margin-bottom: 0; }
+  .option-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; }
+  .option-card.opt-a::before { background: linear-gradient(to right, var(--green), var(--green2)); }
+  .option-card.opt-b::before { background: linear-gradient(to right, var(--yellow), var(--gold2)); }
+  .option-card.opt-c::before { background: linear-gradient(to right, var(--red), var(--red2)); }
+  .option-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .option-label { font-size: 13px; font-weight: 800; }
+  .option-card.opt-a .option-label { color: var(--green2); }
+  .option-card.opt-b .option-label { color: var(--gold2); }
+  .option-card.opt-c .option-label { color: var(--red2); }
+  .option-level { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 20px; background: rgba(255,255,255,0.06); color: var(--text2); }
+  .option-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .option-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 12px; }
+  .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .pros, .cons { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; }
+  .pros-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--green2); margin-bottom: 6px; }
+  .cons-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--red2); margin-bottom: 6px; }
+  .pros li, .cons li { font-size: 12px; color: var(--text2); list-style: none; padding-left: 14px; position: relative; margin-bottom: 4px; }
+  .pros li::before { content: '+'; position: absolute; left: 0; color: var(--green2); font-weight: 700; }
+  .cons li::before { content: '−'; position: absolute; left: 0; color: var(--red2); font-weight: 700; }
+  .when { font-size: 12px; color: var(--text3); background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
+  .when strong { color: var(--text2); }
+  .event-item { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(45,74,110,0.4); align-items: flex-start; }
+  .event-item:last-child { border-bottom: none; }
+  .event-date-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 56px; flex-shrink: 0; }
+  .event-day { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; }
+  .event-month { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .event-body {}
+  .event-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .event-desc { font-size: 13px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+  .impact-pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .impact-alto  { background: rgba(239,68,68,0.15);  color: var(--red2); }
+  .impact-medio { background: rgba(245,158,11,0.15); color: var(--gold2); }
+  .impact-bajo  { background: rgba(16,185,129,0.15); color: var(--green2); }
+  .source-group { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
+  .source-group-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px; }
+  .source-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .source-link { font-size: 12px; color: var(--accent2); text-decoration: none; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 20px; padding: 3px 12px; transition: background 0.15s; }
+  .source-link:hover { background: rgba(59,130,246,0.15); }
+  .divider { height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin: 28px 0; }
+  .silent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 800px) { .silent-grid { grid-template-columns: 1fr; } }
+  .silent-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+  .silent-icon { font-size: 24px; margin-bottom: 8px; }
+  .silent-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 6px; }
+  .silent-figure { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .silent-figure.neg { color: var(--red2); } .silent-figure.pos { color: var(--green2); } .silent-figure.warn { color: var(--gold2); }
+  .silent-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .silent-base { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+  .exposure-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; border-left: 4px solid; }
+  .exposure-card:last-child { margin-bottom: 0; }
+  .exposure-card.exp-red    { border-left-color: var(--red); }
+  .exposure-card.exp-yellow { border-left-color: var(--yellow); }
+  .exposure-card.exp-green  { border-left-color: var(--green); }
+  .exp-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .exp-icon { font-size: 18px; }
+  .exp-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .exp-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-left: auto; }
+  .exposure-card.exp-red    .exp-badge { background: rgba(239,68,68,0.15); color: var(--red2); }
+  .exposure-card.exp-yellow .exp-badge { background: rgba(245,158,11,0.15); color: var(--gold2); }
+  .exposure-card.exp-green  .exp-badge { background: rgba(16,185,129,0.15); color: var(--green2); }
+  .exp-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .exp-figure { font-size: 18px; font-weight: 800; margin-top: 8px; }
+  .exposure-card.exp-red    .exp-figure { color: var(--red2); }
+  .exposure-card.exp-yellow .exp-figure { color: var(--gold2); }
+  .exposure-card.exp-green  .exp-figure { color: var(--green2); }
+  .money-option { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; }
+  .money-option:last-child { margin-bottom: 0; }
+  .money-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+  .money-body { flex: 1; }
+  .money-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+  .money-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .money-yield { font-size: 13px; font-weight: 800; color: var(--green2); background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2); padding: 2px 10px; border-radius: 20px; }
+  .money-risk { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+  .risk-low  { background: rgba(16,185,129,0.12); color: var(--green2); border: 1px solid rgba(16,185,129,0.2); }
+  .risk-med  { background: rgba(245,158,11,0.12);  color: var(--gold2);  border: 1px solid rgba(245,158,11,0.2); }
+  .risk-high { background: rgba(239,68,68,0.12);   color: var(--red2);   border: 1px solid rgba(239,68,68,0.2); }
+  .money-for  { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+  .money-why  { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
+  .money-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--accent2); background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); padding: 4px 12px; border-radius: 20px; text-decoration: none; transition: background 0.15s; }
+  .money-link:hover { background: rgba(59,130,246,0.15); }
+  footer { border-top: 1px solid var(--border); padding: 24px 32px; text-align: center; color: var(--text3); font-size: 11px; background: var(--bg2); line-height: 1.8; }
+  footer a { color: var(--text3); text-decoration: none; }
+  footer a:hover { color: var(--accent2); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="#hero" class="topnav-brand">
+    <span class="vault-icon">🔐</span> The Vault
+  </a>
+  <div class="topnav-links">
+    <a href="#sec-indicadores" class="topnav-link"><span class="nav-icon">📡</span> Indicadores</a>
+    <a href="#sec-hoy"         class="topnav-link"><span class="nav-icon">📰</span> Hoy</a>
+    <a href="#sec-impacto"     class="topnav-link"><span class="nav-icon">💼</span> Impacto</a>
+    <a href="#sec-hacer"       class="topnav-link"><span class="nav-icon">🎯</span> Qué hacer</a>
+    <a href="#sec-vigilar"     class="topnav-link"><span class="nav-icon">🔭</span> Vigilar</a>
+    <a href="#sec-fuentes"     class="topnav-link"><span class="nav-icon">📚</span> Fuentes</a>
+  </div>
+  <div class="topnav-date">Jue 21/05/2026</div>
+</nav>
+
+<div class="hero" id="hero">
+  <div class="hero-top">
+    <div class="hero-badge"><span>🔐</span> The Vault · Briefing Diario</div>
+    <div class="hero-date">Jueves, 21 de mayo de 2026 · Datos: 20 mayo 2026 · 23:30 CET</div>
+  </div>
+  <div class="hero-title">🔐 The <span>Vault</span></div>
+  <div class="hero-subtitle">La economía que te interesa, día a día · 21 de mayo de 2026</div>
+  <div class="signal-bar signal-yellow">
+    <div class="signal-icon">🟡</div>
+    <div class="signal-text">
+      <strong>SEÑAL DEL DÍA: VIGILAR</strong>
+      <p>Buffett en 229,6% (máximo histórico), bonos EEUU 30Y en máximos desde 2007 y PMI Eurozona en contracción — los mercados suben por Nvidia pero la estructura macro se deteriora. Mantén posiciones, no amplíes riesgo.</p>
+    </div>
+  </div>
+</div>
+
+<div class="ticker-bar">
+  <div class="ticker-item">
+    <div class="ticker-name">S&amp;P 500</div>
+    <div class="ticker-price">7.487</div>
+    <div class="ticker-change up">+0,60%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">Nasdaq</div>
+    <div class="ticker-price">26.512</div>
+    <div class="ticker-change up">+1,16%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">EuroStoxx 50</div>
+    <div class="ticker-price">5.962</div>
+    <div class="ticker-change up">+0,51%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">MSCI World</div>
+    <div class="ticker-price">3.892</div>
+    <div class="ticker-change up">+0,55%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">Oro ($/oz)</div>
+    <div class="ticker-price">$4.530</div>
+    <div class="ticker-change down">−0,30%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">Brent ($/b)</div>
+    <div class="ticker-price">$111,15</div>
+    <div class="ticker-change up">+0,15%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">EUR/USD</div>
+    <div class="ticker-price">1,1633</div>
+    <div class="ticker-change up">+0,18%</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">BCE Depósito</div>
+    <div class="ticker-price">2,00%</div>
+    <div class="ticker-change neutral">Sin cambios</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">Fed Funds</div>
+    <div class="ticker-price">3,50–3,75%</div>
+    <div class="ticker-change neutral">Warsh en inicio</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">LEI EE.UU.</div>
+    <div class="ticker-price">97,3</div>
+    <div class="ticker-change down">▼ −0,6% mar</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-name">PMI Compuesto</div>
+    <div class="ticker-price">48,8</div>
+    <div class="ticker-change down">▼ Contracción</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- SECCIÓN 1 -->
+<div class="section" id="sec-indicadores">
+  <div class="section-title">📡 Sección 1 — Indicadores Económicos</div>
+  <div class="section-title" style="font-size:10px;color:var(--text3);margin-top:0;margin-bottom:12px;">1-A · Panel de Indicadores Adelantados</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📡 Indicadores Adelantados — LEI · PMI · CCI · Spreads · Desempleo</div>
+
+      <!-- LEI -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">LEI — Leading Economic Index</div>
+          <div class="ind-value">
+            <div class="ind-num down">97,3</div>
+            <div class="ind-trend">▼ −0,6% en marzo · 4 meses a la baja</div>
+          </div>
+        </div>
+        <div class="ind-explain">Predice la economía con 3-6 meses de antelación. Caída ≥3 meses consecutivos = alerta. Caída >−1% en 6 meses = riesgo de recesión.</div>
+        <div class="ind-ranges">
+          <span class="range-pill range-green">▲ Positivo = Expansión</span>
+          <span class="range-pill range-yellow">▼ Leve = Desaceleración</span>
+          <span class="range-pill range-red">▼▼ −1%/6m = Recesión</span>
+        </div>
+        <div class="ind-bar-wrap">
+          <div class="ind-bar-zone" style="left:0%;width:40%;background:rgba(16,185,129,0.3)"></div>
+          <div class="ind-bar-zone" style="left:40%;width:30%;background:rgba(245,158,11,0.3)"></div>
+          <div class="ind-bar-zone" style="left:70%;width:30%;background:rgba(239,68,68,0.3)"></div>
+          <div class="ind-bar-marker" style="left:58%;border-color:#f59e0b"></div>
+        </div>
+        <div class="ind-detail" style="margin-top:14px">Caída acumulada de −1,0% en los últimos 6 meses. Supera el umbral de alerta. Próxima publicación: 22 mayo (dato abril).</div>
+      </div>
+
+      <!-- PMI -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">PMI Compuesto Eurozona / ISM New Orders</div>
+          <div class="ind-value">
+            <div class="ind-num down">48,8</div>
+            <div class="ind-trend">▼ Mínimos 17 meses (apr) · Servicios 47,6</div>
+          </div>
+        </div>
+        <div class="ind-explain">Por encima de 50 = expansión. Por debajo = contracción. El componente de nuevas órdenes es el más relevante.</div>
+        <div class="ind-ranges">
+          <span class="range-pill range-green">&gt;50 = Expansión</span>
+          <span class="range-pill range-red">&lt;50 = Contracción</span>
+        </div>
+        <div class="ind-bar-wrap">
+          <div class="ind-bar-zone" style="left:0%;width:50%;background:rgba(239,68,68,0.3)"></div>
+          <div class="ind-bar-zone" style="left:50%;width:50%;background:rgba(16,185,129,0.3)"></div>
+          <div class="ind-bar-marker" style="left:48%;border-color:#ef4444"></div>
+          <div class="ind-bar-label" style="left:50%">50</div>
+        </div>
+        <div class="ind-detail" style="margin-top:14px">En zona de contracción por segundo mes consecutivo. Servicios europeos en mínimos de 62 meses — señal de deterioro acelerado.</div>
+      </div>
+
+      <!-- CCI -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">CCI — Confianza del Consumidor (Eurozona)</div>
+          <div class="ind-value">
+            <div class="ind-num down">−20,6</div>
+            <div class="ind-trend">▼ −4,2 pts vs marzo · Flash abril</div>
+          </div>
+        </div>
+        <div class="ind-explain">El subíndice Expectations (perspectivas a 6 meses) es más relevante. Por debajo de −20 = confianza muy deprimida en Europa.</div>
+        <div class="ind-ranges">
+          <span class="range-pill range-green">&gt;−10 = Optimismo</span>
+          <span class="range-pill range-yellow">−10 a −20 = Cautela</span>
+          <span class="range-pill range-red">&lt;−20 = Pesimismo elevado</span>
+        </div>
+        <div class="ind-detail">El consumidor europeo castiga el conflicto en Oriente Medio y la subida de energía. El gasto privado puede frenar la recuperación del PMI.</div>
+      </div>
+
+      <!-- Spread -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">Spread 10Y Treasury − Fed Funds Rate</div>
+          <div class="ind-value">
+            <div class="ind-num up">+1,03%</div>
+            <div class="ind-trend">10Y: 4,65% · Fed: 3,625% · Normal</div>
+          </div>
+        </div>
+        <div class="ind-explain">Curva invertida (negativo) = señal histórica de recesión futura. Cuanto más negativo, más alerta.</div>
+        <div class="ind-ranges">
+          <span class="range-pill range-green">&gt;0 = Curva normal</span>
+          <span class="range-pill range-red">&lt;0 = Curva invertida</span>
+        </div>
+        <div class="ind-detail">Curva positiva, sin señal de recesión inminente por este indicador. Pero el bono 30Y al 5,18% indica que el mercado exige más prima por plazo.</div>
+      </div>
+
+      <!-- Desempleo -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">Solicitudes semanales desempleo (EE.UU.)</div>
+          <div class="ind-value">
+            <div class="ind-num neutral">211k</div>
+            <div class="ind-trend">▲ +12k vs semana anterior · Sobre estimado</div>
+          </div>
+        </div>
+        <div class="ind-explain">Aumentos sostenidos por encima de 250.000 semanales indican deterioro del mercado laboral.</div>
+        <div class="ind-ranges">
+          <span class="range-pill range-green">&lt;225k = Mercado fuerte</span>
+          <span class="range-pill range-yellow">225–250k = Moderado</span>
+          <span class="range-pill range-red">&gt;250k = Deterioro</span>
+        </div>
+        <div class="ind-bar-wrap">
+          <div class="ind-bar-zone" style="left:0%;width:45%;background:rgba(16,185,129,0.3)"></div>
+          <div class="ind-bar-zone" style="left:45%;width:25%;background:rgba(245,158,11,0.3)"></div>
+          <div class="ind-bar-zone" style="left:70%;width:30%;background:rgba(239,68,68,0.3)"></div>
+          <div class="ind-bar-marker" style="left:38%;border-color:#10b981"></div>
+        </div>
+        <div class="ind-detail" style="margin-top:14px">Subida puntual pero mercado laboral aún sólido. Dato clave: próxima publicación el 21 mayo incluirá semana hasta 17 mayo.</div>
+      </div>
+    </div>
+
+    <!-- Card derecha: Buffett + LEI Global + CEO Confidence -->
+    <div class="card">
+      <div class="card-title">🎩 Indicador Buffett + Contexto Global</div>
+
+      <!-- Buffett -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">🎩 Indicador Buffett (Cap. Bursátil / PIB EE.UU.)</div>
+          <div class="ind-value">
+            <div class="ind-num" style="color:var(--red2)">229,6%</div>
+            <div class="ind-trend">▲ +10,6% vs mar · Máximo histórico</div>
+          </div>
+        </div>
+        <div class="ind-explain">Ratio capitalización bursátil total EE.UU. vs PIB. Warren Buffett: 75–90% = razonable. Por encima de 120% = sobrevalorado.</div>
+        <div class="buffett-gauge">
+          <div class="buffett-levels">
+            <div class="buffett-level"><div class="buffett-dot" style="background:var(--green2)"></div>&lt;100% — Mercado razonable</div>
+            <div class="buffett-level"><div class="buffett-dot" style="background:var(--gold2)"></div>100–120% — Moderadamente caro</div>
+            <div class="buffett-level"><div class="buffett-dot" style="background:#fb923c"></div>120–150% — Caro, cautela</div>
+            <div class="buffett-level buffett-active"><div class="buffett-dot" style="background:var(--red2)"></div>&gt;150% — Extremadamente caro <span class="buffett-arrow">◀ 229,6%</span></div>
+          </div>
+        </div>
+        <div class="ind-detail" style="margin-top:8px">En marzo estaba al 219% (2,1 desviaciones sobre la media histórica). Hoy en máximos absolutos. La bolsa americana cotiza como si el PIB futuro estuviera ya descontado a 10 años vista.</div>
+      </div>
+
+      <!-- LEI Global -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">Contexto Global — LEI por región (feb–mar 2026)</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px">
+            <thead>
+              <tr>
+                <th style="text-align:left;color:var(--text3);font-size:10px;padding:6px 8px;border-bottom:1px solid var(--border)">Región</th>
+                <th style="text-align:right;color:var(--text3);font-size:10px;padding:6px 8px;border-bottom:1px solid var(--border)">Variación</th>
+                <th style="text-align:right;color:var(--text3);font-size:10px;padding:6px 8px;border-bottom:1px solid var(--border)">Tendencia 6m</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:8px;color:var(--text)">🇺🇸 EE.UU.</td>
+                <td style="padding:8px;text-align:right;color:var(--red2)">−0,6%</td>
+                <td style="padding:8px;text-align:right;color:var(--red2)">−1,0% / 6m ⚠️</td>
+              </tr>
+              <tr>
+                <td style="padding:8px;color:var(--text)">🇪🇺 Eurozona</td>
+                <td style="padding:8px;text-align:right;color:var(--red2)">−0,3%</td>
+                <td style="padding:8px;text-align:right;color:var(--gold2)">Plano / bajista</td>
+              </tr>
+              <tr>
+                <td style="padding:8px;color:var(--text)">🇨🇳 China</td>
+                <td style="padding:8px;text-align:right;color:var(--gold2)">+0,1%</td>
+                <td style="padding:8px;text-align:right;color:var(--gold2)">Estabilización</td>
+              </tr>
+              <tr>
+                <td style="padding:8px;color:var(--text)">🌍 Em. Markets</td>
+                <td style="padding:8px;text-align:right;color:var(--red2)">−0,4%</td>
+                <td style="padding:8px;text-align:right;color:var(--red2)">Presión energía</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CEO Confidence / HWOL -->
+      <div class="indicator-row">
+        <div class="ind-header">
+          <div class="ind-name">CEO Confidence + HWOL + Euríbor</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+            <span style="color:var(--text2)">CEO Confidence (Q1 2026)</span>
+            <span style="color:var(--gold2);font-weight:700">41 — Pesimismo leve</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+            <span style="color:var(--text2)">HWOL — Demanda laboral online</span>
+            <span style="color:var(--gold2);font-weight:700">▼ En declive suave</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+            <span style="color:var(--text2)">Euríbor 12m (20 mayo)</span>
+            <span style="color:var(--red2);font-weight:700">2,821% (+0,74pts vs hace 1 año)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+            <span style="color:var(--text2)">IPC España / Eurozona (abril)</span>
+            <span style="color:var(--gold2);font-weight:700">3,2% / 3,0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1-B Interpretación -->
+  <div class="section-title" style="font-size:10px;color:var(--text3);margin-top:20px;margin-bottom:10px;">1-B · Interpretación Integrada</div>
+  <div class="summary-box">
+    <p>Los indicadores adelantados muestran un cuadro de <strong>desaceleración ordenada pero acelerando</strong>. El LEI lleva cuatro meses consecutivos a la baja y ha superado el umbral de −1% en seis meses, lo que históricamente precede a recesiones en un plazo de 9–18 meses. El PMI compuesto de la Eurozona en 48,8 confirma que el sector servicios europeo ya está en contracción, arrastrado por el choque energético derivado del conflicto en Oriente Medio.</p>
+    <p>Sin embargo, los mercados financieros cuentan otra historia: el S&P 500 acaba de marcar máximos históricos impulsado por los resultados de Nvidia (+85% de ingresos), y el Buffett Indicator en 229,6% indica que la capitalización bursátil de EE.UU. equivale a 2,3 veces su PIB. Esta <strong>divergencia entre economía real y mercados financieros</strong> es la principal fuente de riesgo estructural: cuando llegue la corrección, será más brusca por la sobrevaloración de partida.</p>
+    <p>El Euríbor en 2,821% confirma que el BCE no ha terminado de traspasar los tipos al sistema. Las hipotecas variables españolas con revisión anual pagarán de media <strong>63€ más al mes</strong> en las próximas revisiones. La inflación en España (3,2%) y Eurozona (3,0%) supera el objetivo del BCE, que enfrenta el dilema de mantener o subir tipos en un contexto de crecimiento frágil.</p>
+    <p><strong>En conjunto</strong>: la señal macro apunta a cautela estructural. El mercado laboral estadounidense es la última ancla de estabilidad. Cuando el paro semanal supere de forma consistente los 225k, las probabilidades de recesión aumentarán drásticamente.</p>
+  </div>
+
+  <!-- 1-C Fases -->
+  <div class="section-title" style="font-size:10px;color:var(--text3);margin-top:0;margin-bottom:10px;">1-C · Fases del Ciclo Económico — ¿Dónde estamos?</div>
+  <div class="cycle-container">
+    <div class="cycle-phase phase-expansion">
+      <div class="phase-label-row"><div class="phase-icon">🚀</div></div>
+      <div class="phase-name">Expansión</div>
+      <div class="phase-desc">LEI al alza, PMI &gt;55, CCI alto, spread positivo. Favorable para renta variable.</div>
+      <div class="phase-signal">→ Comprar/mantener RV</div>
+    </div>
+    <div class="cycle-phase active phase-decel">
+      <div class="phase-label-row"><div class="phase-icon">⚠️</div><div class="phase-here">ESTAMOS AQUÍ</div></div>
+      <div class="phase-name">Desaceleración</div>
+      <div class="phase-desc">Crecimiento positivo pero perdiendo fuerza. LEI en caída, PMI en contracción en Eurozona, Buffett en extremos.</div>
+      <div class="phase-signal">→ Cautela · Mantener y vigilar</div>
+    </div>
+    <div class="cycle-phase phase-contraction">
+      <div class="phase-label-row"><div class="phase-icon">📉</div></div>
+      <div class="phase-name">Contracción</div>
+      <div class="phase-desc">LEI negativo sostenido, PMI &lt;50, spread invertido. Evaluar reducir riesgo.</div>
+      <div class="phase-signal">→ Reducir RV · Refugio</div>
+    </div>
+    <div class="cycle-phase phase-recovery">
+      <div class="phase-label-row"><div class="phase-icon">🌱</div></div>
+      <div class="phase-name">Recuperación</div>
+      <div class="phase-desc">Primeras señales de rebote tras caída. Oportunidad de incrementar posiciones.</div>
+      <div class="phase-signal">→ Acumular en caídas</div>
+    </div>
+  </div>
+</div>
